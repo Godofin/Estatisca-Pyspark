@@ -204,3 +204,27 @@ for column, outliers in outliers_dict.items():
     outliers.show()
 
 ```
+
+## Detecção Z-Score
+
+```
+def detect_outliers(df, column_name, threshold=3):
+    # Calcular estatísticas descritivas
+    stats = df.select(
+        mean(col(column_name)).alias("mean"),
+        stddev(col(column_name)).alias("stddev")
+    ).collect()
+    
+    mean_value = stats[0]["mean"]
+    stddev_value = stats[0]["stddev"]
+    
+    # Calcular Z-Score e filtrar outliers
+    df_with_zscore = df.withColumn("z_score", (col(column_name) - mean_value) / stddev_value)
+    outliers = df_with_zscore.filter((col("z_score") > threshold) | (col("z_score") < -threshold))
+    
+    return outliers
+
+outliers = detect_outliers(df, "value")
+outliers.show()
+```
+
