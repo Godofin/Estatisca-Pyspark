@@ -167,3 +167,40 @@ all_stats_df = compute_all_statistics(df, column_name)
 
 all_stats_df.show()
 ```
+# Detecção de outliers
+
+## Detecção Interquantil
+
+```
+def detect_outliers(df, column):
+    # Calcular Q1 e Q3
+    q1 = df.approxQuantile(column, [0.25], 0.01)[0]
+    q3 = df.approxQuantile(column, [0.75], 0.01)[0]
+    iqr = q3 - q1
+    
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+    
+    # Filtrar os outliers
+    outliers = df.filter((col(column) < lower_bound) | (col(column) > upper_bound))
+    return outliers
+
+
+## Aplicando em uma única coluna
+
+column = "column"
+outliers = detect_outliers(df_base_earn, column)
+
+## Aplicando em várias colunas
+columns = ["column1", "column2"]
+
+outliers_dict = {}
+for column in columns:
+    outliers_dict[column] = detect_outliers(df_base_earn, column)
+
+# Exibir os outliers para cada coluna
+for column, outliers in outliers_dict.items():
+    print(f"Outliers for {column}:")
+    outliers.show()
+
+```
